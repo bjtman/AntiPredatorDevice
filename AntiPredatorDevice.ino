@@ -168,7 +168,7 @@ byte blinkm_addr_a = 0x09;          // I2C Address of one of the LED's. LED A
 byte blinkm_addr_b = 0x0C;          // I2C Address of one of the LED's. LED B
 byte blinkm_addr_c = 0x0D;          // I2C Address of one of the LED's. LED C
 
-byte LedArrayAddress[11] = {0x09,0x0C,0x0D,0x04,0x05,0x06,0x07,0x08,0x0A,0x0B,0x0E};    // Global array that houses LED addresses
+byte LedArrayAddress[8] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07};    // Global array that houses LED addresses
 
 
 // Global Variables for Menu selection items
@@ -947,11 +947,13 @@ void menuUsed(MenuUseEvent used){
 		SD.end();
 		SD.begin(CARDCS);    // initialise the SD card
 		Serial.println("Playing Audio Track 1");
-		musicPlayer.startPlayingFile("track001.mp3");
 		
-		while(musicPlayer.playingMusic) {
-			// do nothing,
+		while(!musicPlayer.playFullFile("track001.mp3")) {
+			// do nothing
+			Serial.println("Inside the while loop");
 		}
+		
+		
 		// delay(3000);
 		digitalWrite(MUTE_AUDIO_PIN,LOW);
 		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
