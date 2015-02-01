@@ -233,7 +233,7 @@ void setup() {
 	initialize_real_time_clock();
 	initialize_and_test_leds();
 	initialize_pin_modes();
-	//initialize_and_calibrate_PIR_sensor_array();
+	initialize_and_calibrate_PIR_sensor_array();
 	initialize_lux_sensor();
 	initialize_datalogging_sd_card();
 	initialize_vs1053_music_player();
@@ -620,15 +620,20 @@ void initialize_pin_modes() {
 }
 
 void initialize_and_calibrate_PIR_sensor_array() {
-	
+	wipe_LCD_screen(); // function to clear the screen of contents
 	//give the sensor some time to calibrate
-	Serial.print("calibrating sensor ");
-	for(int i = 0; i < PIR_CALIBRATION_TIME; i++){
+	Serial.print("Calibrating sensor ");
+	lcd.setCursor(0,3);
+	lcd.print("Calibrating PIR's");
+	for(int i = 0; i < PIR_CALIBRATION_TIME; i++) {
 		Serial.print(".");
 		delay(1000);
+		
 	}
 	Serial.println(" done");
 	Serial.println("SENSOR ACTIVE");
+	lcd.setCursor(0,3);
+	lcd.print("Calibration Done!");
 	delay(50);
 }
 
