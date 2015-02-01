@@ -54,7 +54,6 @@
         <avrgcc.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
-            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -103,7 +102,6 @@
         <avrgcccpp.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
-            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -313,7 +311,6 @@ build.arch=AVR
         <avrgcc.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
-            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -362,7 +359,6 @@ build.arch=AVR
         <avrgcccpp.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
-            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
