@@ -520,6 +520,13 @@ void loop() {
 					 Serial.print(millis()/1000);
 					 Serial.println(" sec");
 					 delay(50);
+					 
+					 //debug LCD printout
+					 lcd.setBacklight(HIGH);
+					 wipe_LCD_screen();
+					 lcd.setCursor(0,2);
+					 lcd.print("Motion Detected!");
+					 
 				 }
 				 takeLowTime = true;
 			 }
