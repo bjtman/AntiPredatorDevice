@@ -1,5 +1,5 @@
-// APD version 1.2.1
-// 2/1/15
+// APD version 1.2.2
+// 2/17/15
 // Brian Tice
 //
 
@@ -65,9 +65,9 @@
 
 
 
-#define PIR_A_LED_PIN         40
-#define PIR_B_LED_PIN         41
-#define DAY_NIGHT_ISR_PIN      2
+#define PIR_A_LED_PIN         6
+#define PIR_B_LED_PIN         2
+#define DAY_NIGHT_ISR_PIN      2 // now used by PIR_B!
 #define PIR_B_SIGNAL_PIN      18
 #define SOUND_SWITCH_PIN      12
 #define PIR_CALIBRATION_TIME   5
@@ -508,7 +508,7 @@ void loop() {
 			
 			// Check PIR's Here
 			
-			
+			// PIR A
 			
 			 if(digitalRead(PIR_A_LED_PIN         ) == HIGH){
 				 //digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
@@ -525,7 +525,7 @@ void loop() {
 					 lcd.setBacklight(HIGH);
 					 wipe_LCD_screen();
 					 lcd.setCursor(0,2);
-					 lcd.print("Motion Detected!");
+					 lcd.print("MotionA Detected!");
 					 
 				 }
 				 takeLowTime = true;
@@ -548,10 +548,71 @@ void loop() {
 					 Serial.print((millis() - pause)/1000);
 					 Serial.println(" sec");
 					 delay(50);
+					  wipe_LCD_screen();
+					 lcd.setBacklight(HIGH);
+					  lcd.setCursor(0,1);
+					  lcd.print("motion ended at ");
+					  lcd.print((millis() - pause)/1000);
+					  lcd.setCursor(0,2);
+					  
+					  
+					 delay(1000);
+					  lcd.setBacklight(LOW);
 				 }
 			 }
 			
+			// PIR B
 			
+			 if(digitalRead(PIR_B_LED_PIN         ) == HIGH){
+				 //digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
+				 if(lockLow){
+					 //makes sure we wait for a transition to LOW before any further output is made:
+					 lockLow = false;
+					 Serial.println("---");
+					 Serial.print("motion detected at ");
+					 Serial.print(millis()/1000);
+					 Serial.println(" sec");
+					 delay(50);
+					 
+					 //debug LCD printout
+					 lcd.setBacklight(HIGH);
+					 wipe_LCD_screen();
+					 lcd.setCursor(0,2);
+					 lcd.print("MotionB Detected!");
+					 
+				 }
+				 takeLowTime = true;
+			 }
+
+			 if(digitalRead(PIR_B_LED_PIN         ) == LOW){
+				 // digitalWrite(ledPin, LOW);  //the led visualizes the sensors output pin state
+
+				 if(takeLowTime){
+					 lowIn = millis();          //save the time of the transition from high to LOW
+					 takeLowTime = false;       //make sure this is only done at the start of a LOW phase
+				 }
+				 //if the sensor is low for more than the given pause,
+				 //we assume that no more motion is going to happen
+				 if(!lockLow && millis() - lowIn > pause){
+					 //makes sure this block of code is only executed again after
+					 //a new motion sequence has been detected
+					 lockLow = true;
+					 Serial.print("motion ended at ");      //output
+					 Serial.print((millis() - pause)/1000);
+					 Serial.println(" sec");
+					 delay(50);
+					 wipe_LCD_screen();
+					 lcd.setBacklight(HIGH);
+					 lcd.setCursor(0,1);
+					 lcd.print("motion ended at ");
+					 lcd.print((millis() - pause)/1000);
+					 lcd.setCursor(0,2);
+					 
+					 
+					 delay(1000);
+					 lcd.setBacklight(LOW);
+				 }
+			 }
 			
 			BlinkM_playScript( LedArrayAddress[ledSelect], randomLEDProgram, 0x00,0x00);
 			delay(delayBlinkTime);
@@ -665,8 +726,8 @@ void initialize_pin_modes() {
 	pinMode(BUTTON_PIN_5, INPUT);
 	pinMode(DAY_NIGHT_ISR_PIN, INPUT);
 	pinMode(PIR_B_SIGNAL_PIN, INPUT);
-	pinMode(PIR_A_LED_PIN, OUTPUT);
-	pinMode(PIR_B_LED_PIN, OUTPUT);
+	pinMode(PIR_A_LED_PIN, INPUT);
+	pinMode(PIR_B_LED_PIN, INPUT);
 	pinMode(SOUND_SWITCH_PIN,INPUT);
 	pinMode(MUTE_AUDIO_PIN,OUTPUT);
 	pinMode(SS, OUTPUT);
