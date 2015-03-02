@@ -179,6 +179,8 @@ boolean piezo_enabled;
 boolean big_LED_enabled;
 boolean small_LED_enabled;
 
+boolean soundOnMotion_enabled;
+
 int pattern_type;         // RED =    1
 // Green =  2
 // Blue =   3
@@ -240,6 +242,13 @@ void setup() {
 	
 	
 	Serial.begin(19200);
+	
+	
+	// Encode Initial Global States
+	
+	soundOnMotion_enabled = true;
+	piezo_enabled = false;
+	
 	initialize_lcd_backpack_and_screen();
 	initialize_real_time_clock();
 	initialize_and_test_leds();
@@ -250,6 +259,7 @@ void setup() {
 	initialize_vs1053_music_player();
 	initialize_LCD_menu_system();
 	initialize_stereo();
+	
 	
 	attachInterrupt(4,pin_19_ISR,CHANGE);
 	//attachInterrupt(0,DayNightISR,FALLING);
@@ -491,8 +501,11 @@ void loop() {
 			
 			unsigned long delayBlinkTime = random(500,2000);
 			
+			// no longer a sound switch pin, at least it is not installed currently
+			
 			int SoundSwitchState = digitalRead(SOUND_SWITCH_PIN);
-			if(SoundSwitchState == HIGH)
+			//if(SoundSwitchState == HIGH)
+			if(piezo_enabled == true)
 			{
 				
 				int probabilityofSound = random(0,50);
@@ -510,9 +523,9 @@ void loop() {
 			
 			// PIR A
 			
-			 if(digitalRead(PIR_A_LED_PIN         ) == HIGH){
+			 if(digitalRead(PIR_A_LED_PIN) == HIGH) {
 				 //digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
-				 if(lockLow){
+				 if(lockLow) {
 					 //makes sure we wait for a transition to LOW before any further output is made:
 					 lockLow = false;
 					 Serial.println("---");
@@ -521,11 +534,58 @@ void loop() {
 					 Serial.println(" sec");
 					 delay(50);
 					 
-					 //debug LCD printout
-					 lcd.setBacklight(HIGH);
-					 wipe_LCD_screen();
-					 lcd.setCursor(0,2);
-					 lcd.print("MotionA Detected!");
+					 
+					  //debug LCD printout
+					  lcd.setBacklight(HIGH);
+					  wipe_LCD_screen();
+					  lcd.setCursor(0,2);
+					  lcd.print("MotionA Detected!");
+					 
+					 
+					 
+					 // Check SoundOnMotion flag: 
+					 // If SoundOnMotion = TRUE, then trigger sound file track001.mp3
+					 // If SoundOnMotion = FALSE, then do not trigger any sound
+					 
+					 if(soundOnMotion_enabled == true) {
+						 
+					   // blink a pattern here during playback
+					   
+					   BlinkM_playScript( LedArrayAddress[7], 18, 0x00,0x00);
+					   //delay(2000);
+					
+					   
+					   // Start playing a file, then we can do stuff while waiting for it to finish
+					   digitalWrite(MUTE_AUDIO_PIN,HIGH);
+					   SD.end();
+					   SD.begin(CARDCS);    // initialise the SD card
+					   Serial.println("Playing Audio Track 1");
+					   
+					   while(!musicPlayer.playFullFile("track001.mp3")) {
+						   // do nothing
+						   Serial.println("Inside the while loop");
+					   }
+					   
+					   
+					   // delay(3000);
+					   digitalWrite(MUTE_AUDIO_PIN,LOW);
+					   state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+					   wipe_LCD_screen();
+					  
+
+					  
+				         BlinkM_stopScript(LedArrayAddress[7]);
+				         //delay(100);
+				         BlinkM_fadeToRGB(LedArrayAddress[7], 0,0,0);
+					   
+					 
+					 }
+				 
+					 
+					 
+					
+					 
+					 
 					 
 				 }
 				 takeLowTime = true;
@@ -932,6 +992,9 @@ void initialize_vs1053_music_player() {
 	// Set volume for left, right channels. lower numbers == louder volume!
 	musicPlayer.setVolume(2,2);
 
+	
+	
+	
 	// Timer interrupts are not suggested, better to use DREQ interrupt!
 	//musicPlayer.useInterrupt(VS1053_FILEPLAYER_TIMER0_INT); // timer int
 
@@ -975,11 +1038,13 @@ void initialize_stereo() {
 		
 	}
 	
-	digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
-	delay(2000);
-	digitalWrite(PIEZO_SOUNDER_PIN,LOW);
+	if(piezo_enabled == true) { 
+	  digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
+	  delay(2000);
+	  digitalWrite(PIEZO_SOUNDER_PIN,LOW);
 	
-	digitalWrite(MUTE_AUDIO_PIN,LOW);
+	  digitalWrite(MUTE_AUDIO_PIN,LOW);
+	}
 }
 
 
