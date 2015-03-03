@@ -180,6 +180,8 @@ boolean big_LED_enabled;
 boolean small_LED_enabled;
 
 boolean soundOnMotion_enabled;
+boolean soundOnFrontMotion_enabled;
+boolean soundOnBottomMotion_enabled;
 
 int pattern_type;         // RED =    1
 // Green =  2
@@ -246,8 +248,12 @@ void setup() {
 	
 	// Encode Initial Global States
 	
-	soundOnMotion_enabled = true;
-	piezo_enabled = false;
+	soundOnMotion_enabled = true;		// default mp3 playback is on
+	soundOnFrontMotion_enabled =		false;
+	soundOnBottomMotion_enabled =		true;
+	
+	
+	piezo_enabled = false;				// default piezo is not enabled
 	
 	initialize_lcd_backpack_and_screen();
 	initialize_real_time_clock();
@@ -521,7 +527,7 @@ void loop() {
 			
 			// Check PIR's Here
 			
-			// PIR A
+			// PIR A - Also known as the FRONT FACING PIR Sensor. This could have a lot of false positives, so default to sound not enabled not enabled, but escalated lights.
 			
 			 if(digitalRead(PIR_A_LED_PIN) == HIGH) {
 				 //digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
@@ -535,23 +541,21 @@ void loop() {
 					 delay(50);
 					 
 					 
-					  //debug LCD printout
-					  lcd.setBacklight(HIGH);
-					  wipe_LCD_screen();
-					  lcd.setCursor(0,2);
-					  lcd.print("MotionA Detected!");
-					 
-					 
+					 //debug LCD printout
+					 lcd.setBacklight(HIGH);
+					 wipe_LCD_screen();
+					 lcd.setCursor(0,2);
+					 lcd.print("MotionA Detected!");
 					 
 					 // Check SoundOnMotion flag: 
 					 // If SoundOnMotion = TRUE, then trigger sound file track001.mp3
 					 // If SoundOnMotion = FALSE, then do not trigger any sound
 					 
-					 if(soundOnMotion_enabled == true) {
+					 if(soundOnFrontMotion_enabled == true) {
 						 
 					   // blink a pattern here during playback
 					   
-					   BlinkM_playScript( LedArrayAddress[7], 18, 0x00,0x00);
+					  
 					   //delay(2000);
 					
 					   
@@ -566,32 +570,21 @@ void loop() {
 						   Serial.println("Inside the while loop");
 					   }
 					   
-					   
-					   // delay(3000);
-					   digitalWrite(MUTE_AUDIO_PIN,LOW);
-					   state =STATE_PREPARE_FOR_DAYTIME_IDLE;
-					   wipe_LCD_screen();
-					  
-
-					  
-				         BlinkM_stopScript(LedArrayAddress[7]);
-				         //delay(100);
-				         BlinkM_fadeToRGB(LedArrayAddress[7], 0,0,0);
-					   
-					 
+ 
 					 }
-				 
-					 
-					 
-					
-					 
-					 
+				     BlinkM_playScript( LedArrayAddress[7], 18, 0x00,0x00); // Play S.O.S. script for duration of audio track to all LED's
+				     //can we remove LED lag by iterating through each LED with a for loop?
+					 delay(2000);
+					 digitalWrite(MUTE_AUDIO_PIN,LOW);
+					 state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+					// wipe_LCD_screen();
+	
 					 
 				 }
 				 takeLowTime = true;
 			 }
 
-			 if(digitalRead(PIR_A_LED_PIN         ) == LOW){
+			 if(digitalRead(PIR_A_LED_PIN) == LOW){
 				// digitalWrite(ledPin, LOW);  //the led visualizes the sensors output pin state
 
 				 if(takeLowTime){
@@ -604,7 +597,7 @@ void loop() {
 					 //makes sure this block of code is only executed again after
 					 //a new motion sequence has been detected
 					 lockLow = true;
-					 Serial.print("motion ended at ");      //output
+					 Serial.print("motion A ended at ");      //output
 					 Serial.print((millis() - pause)/1000);
 					 Serial.println(" sec");
 					 delay(50);
@@ -615,15 +608,18 @@ void loop() {
 					  lcd.print((millis() - pause)/1000);
 					  lcd.setCursor(0,2);
 					  
+					       BlinkM_stopScript(LedArrayAddress[7]);
+					       //delay(100);
+					       BlinkM_fadeToRGB(LedArrayAddress[7], 0,0,0);
 					  
 					 delay(1000);
 					  lcd.setBacklight(LOW);
 				 }
 			 }
 			
-			// PIR B
+			// PIR B -- also known as the Bottom Facing PIR. This is only if an animal is super close. So it defaults to audio on, lights go crazy
 			
-			 if(digitalRead(PIR_B_LED_PIN         ) == HIGH){
+			 if(digitalRead(PIR_B_LED_PIN) == HIGH){
 				 //digitalWrite(ledPin, HIGH);   //the led visualizes the sensors output pin state
 				 if(lockLow){
 					 //makes sure we wait for a transition to LOW before any further output is made:
@@ -640,11 +636,50 @@ void loop() {
 					 lcd.setCursor(0,2);
 					 lcd.print("MotionB Detected!");
 					 
+					 
+					 // Check SoundOnMotion flag:
+					 // If SoundOnMotion = TRUE, then trigger sound file track001.mp3
+					 // If SoundOnMotion = FALSE, then do not trigger any sound
+					 
+					 if(soundOnMotion_enabled == true) {
+						 
+						 // blink a pattern here during playback
+						 
+						 BlinkM_playScript( LedArrayAddress[7], 16, 0x00,0x00);
+						 //delay(2000);
+						 
+						 
+						 // Start playing a file, then we can do stuff while waiting for it to finish
+						 digitalWrite(MUTE_AUDIO_PIN,HIGH);
+						 SD.end();
+						 SD.begin(CARDCS);    // initialise the SD card
+						 Serial.println("Playing Audio Track 1");
+						 
+						 while(!musicPlayer.playFullFile("track001.mp3")) {
+							 // do nothing
+							 Serial.println("Inside the while loop");
+						 }
+						 
+						 
+						 // delay(3000);
+						 digitalWrite(MUTE_AUDIO_PIN,LOW);
+						 state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+						 wipe_LCD_screen();
+						 
+
+						 
+						 BlinkM_stopScript(LedArrayAddress[7]);
+						 //delay(100);
+						 BlinkM_fadeToRGB(LedArrayAddress[7], 0,0,0);
+					 
+					 }
+					 
+ 
 				 }
 				 takeLowTime = true;
 			 }
 
-			 if(digitalRead(PIR_B_LED_PIN         ) == LOW){
+			 if(digitalRead(PIR_B_LED_PIN) == LOW){
 				 // digitalWrite(ledPin, LOW);  //the led visualizes the sensors output pin state
 
 				 if(takeLowTime){
@@ -657,7 +692,7 @@ void loop() {
 					 //makes sure this block of code is only executed again after
 					 //a new motion sequence has been detected
 					 lockLow = true;
-					 Serial.print("motion ended at ");      //output
+					 Serial.print("motion B ended at ");      //output
 					 Serial.print((millis() - pause)/1000);
 					 Serial.println(" sec");
 					 delay(50);
@@ -674,12 +709,14 @@ void loop() {
 				 }
 			 }
 			
+			// Standard Night Time Light Behavior is set below:
+			
 			BlinkM_playScript( LedArrayAddress[ledSelect], randomLEDProgram, 0x00,0x00);
 			delay(delayBlinkTime);
 			BlinkM_stopScript(LedArrayAddress[ledSelect]);
 			BlinkM_fadeToRGB(LedArrayAddress[ledSelect], 0,0,0);
 			
-			
+			// Check for dawn
 			
 			if (light.getData(data0,data1))
 			{
