@@ -136,37 +136,37 @@ MenuBackend menu = MenuBackend(menuUsed,menuChanged);  //Menu variables
 
 
 MenuItem menu1Item1 =         MenuItem("Select Alarm Modes");           //initialize menuitems
-MenuItem menuItem1SubItem1 =  MenuItem("Audio Enable");
-MenuItem menuItem1SubItem2 =  MenuItem("Audio Disable");
-MenuItem menuItem1SubItem3 =  MenuItem("Piezo Enable");
-MenuItem menuItem1SubItem4 =  MenuItem("Piezo Disable");
-MenuItem menuItem1SubItem5 =  MenuItem("Small LED Enable");
-MenuItem menuItem1SubItem6 =  MenuItem("Small LED Disable");
-MenuItem menuItem1SubItem7 =  MenuItem("Big LED Enable");
-MenuItem menuItem1SubItem8 =  MenuItem("Big LED Disable");
+MenuItem menuItem1SubItem1 =  MenuItem("Audio Enable");					// soundOnBottomMotion_enabled and soundOnFrontMotion_enabled set true
+MenuItem menuItem1SubItem2 =  MenuItem("Audio Disable");                // soundOnBottomMotion_enabled and soundOnFrontMotion_enabled set false
+MenuItem menuItem1SubItem3 =  MenuItem("Piezo Enable");                 // piezo_enabled set true
+MenuItem menuItem1SubItem4 =  MenuItem("Piezo Disable");                // piezo_enabled set false
+MenuItem menuItem1SubItem5 =  MenuItem("Small LED Enable");			    // flag for REMOVAL
+MenuItem menuItem1SubItem6 =  MenuItem("Small LED Disable");            // flag for REMOVAL
+MenuItem menuItem1SubItem7 =  MenuItem("Big LED Enable");               // flag for REMOVAL
+MenuItem menuItem1SubItem8 =  MenuItem("Big LED Disable");              // flag for REMOVAL
 MenuItem menu1Item2 =         MenuItem("Select Alarm Pattern");
-MenuItem menuItem2SubItem1 =  MenuItem("LEDs Red");
-MenuItem menuItem2SubItem2 =  MenuItem("LEDs Green");
-MenuItem menuItem2SubItem3 =  MenuItem("LEDs Blue");
-MenuItem menuItem2SubItem4 =  MenuItem("LEDs Random Color");
-MenuItem menuItem2SubItem5 =  MenuItem("Piezo Short");
-MenuItem menuItem2SubItem6 =  MenuItem("Piezo Long");
-MenuItem menuItem2SubItem7 =  MenuItem("Piezo Random");
-MenuItem menuItem2SubItem8 =  MenuItem("Audio Track 1");
+MenuItem menuItem2SubItem1 =  MenuItem("LEDs Red");                     // pattern_type set to RED (only play red based routines)
+MenuItem menuItem2SubItem2 =  MenuItem("LEDs Green");                   // pattern_type set to GREEN (only play green based routines)
+MenuItem menuItem2SubItem3 =  MenuItem("LEDs Blue");                    // pattern_type set to BLUE (only play blue based routines)
+MenuItem menuItem2SubItem4 =  MenuItem("LEDs Random Color");	        // pattern_type set to RANDOM (only play blue based routines)		
+MenuItem menuItem2SubItem5 =  MenuItem("Piezo Short");                  // piezo_time_length set to 2000ms 
+MenuItem menuItem2SubItem6 =  MenuItem("Piezo Long");                   // piezo_time_length set to 4000ms 
+MenuItem menuItem2SubItem7 =  MenuItem("Piezo Random");                 // piezo_time_length set to random(0-4000)ms
+MenuItem menuItem2SubItem8 =  MenuItem("Audio Track 1"); 
 MenuItem menuItem2SubItem9 =  MenuItem("Audio Track 2");
 MenuItem menuItem2SubItem10 = MenuItem("Audio Track Random");
 MenuItem menu1Item3 =         MenuItem("System Changes");
-MenuItem menuItem3SubItem1 =  MenuItem("Inc Volume (+)");
-MenuItem menuItem3SubItem2 =  MenuItem("Dec Volume (-)");
+MenuItem menuItem3SubItem1 =  MenuItem("Inc Volume (+)");               // flag for REMOVAL
+MenuItem menuItem3SubItem2 =  MenuItem("Dec Volume (-)");               // flag for REMOVAL
 MenuItem menu1Item4 =         MenuItem("Done");
 MenuItem menu1Item4SubItem1 = MenuItem("Finished with Menu");
 
 const boolean BLINKM_ARDUINO_POWERED = true;  // For now this is true. This will change when moving for bench
 // testing to field testing
 
-byte blinkm_addr_a = 0x09;          // I2C Address of one of the LED's. LED A
-byte blinkm_addr_b = 0x0C;          // I2C Address of one of the LED's. LED B
-byte blinkm_addr_c = 0x0D;          // I2C Address of one of the LED's. LED C
+byte blinkm_addr_a = 0x09;          // I2C Address of one of the LED's. LED A flag for REMOVAL
+byte blinkm_addr_b = 0x0C;          // I2C Address of one of the LED's. LED B flag for REMOVAL
+byte blinkm_addr_c = 0x0D;          // I2C Address of one of the LED's. LED C flag for REMOVAL
 
 byte LedArrayAddress[8] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07};    // Global array that houses LED addresses
 
@@ -195,9 +195,9 @@ int piezo_time_length;    // Short = 2seconds
 // Long = 4 seconds
 // Random(2,6)
 
-int play_track;           // 1,2 or 3 for random
+int play_track;           // 1,2 or 3 for random flag for REMOVAL
 
-int volume;               // 0-63. (+) means up 3. (-) means down 3. plus check boundary conditions.
+int volume;               // 0-63. (+) means up 3. (-) means down 3. plus check boundary conditions. flag for REMOVAL
 
 
 
@@ -251,7 +251,7 @@ void setup() {
 	soundOnMotion_enabled = true;		// default mp3 playback is on
 	soundOnFrontMotion_enabled =		false;
 	soundOnBottomMotion_enabled =		true;
-	
+
 	
 	piezo_enabled = false;				// default piezo is not enabled
 	
@@ -434,7 +434,7 @@ void loop() {
 		
 		case STATE_DAY_NIGHT_ISR:
 		{
-			Serial.println("State Day/Night ISR, transitioning to armed state. clearning and turing off interrupt 0");
+			Serial.println("State Day/Night ISR, transitioning to armed state. clearing and turning off interrupt 0");
 			
 			//light.clearInterrupt();
 			//light.setInterruptControl(0, 0);
@@ -493,11 +493,11 @@ void loop() {
 			}
 			if(pattern_type == RED_LED_PATTERN_TYPE)
 			{
-				randomLEDProgram = 13;  // 5 and 13 are Blue only scripts
+				randomLEDProgram = 3;  // 3 and 
 			}
 			if(pattern_type == GREEN_LED_PATTERN_TYPE)
 			{
-				randomLEDProgram = 5;  // 5 and 13 are Blue only scripts
+				randomLEDProgram = 4;  // 5 and 13 are Blue only scripts
 			}
 			if(pattern_type == RANDOM_LED_PATTERN_TYPE)
 			{
@@ -514,12 +514,12 @@ void loop() {
 			if(piezo_enabled == true)
 			{
 				
-				int probabilityofSound = random(0,50);
+				int probabilityofSound = random(0,50);		// randomness of piezo, can change.
 				if(probabilityofSound < 10) {
 					
-					int randomPiezotime = random(1,1500);   // Piezo element goes High for 1ms to 1500ms
+					//int randomPiezotime = random(1,1500);   // Piezo element goes High for 1ms to 1500ms
 					digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
-					delay(randomPiezotime);
+					delay(piezo_time_length);
 					digitalWrite(PIEZO_SOUNDER_PIN,LOW);
 				}
 			}
@@ -645,7 +645,7 @@ void loop() {
 						 
 						 // blink a pattern here during playback
 						 
-						 BlinkM_playScript( LedArrayAddress[7], 16, 0x00,0x00);
+						 BlinkM_playScript( LedArrayAddress[7], 18, 0x00,0x00);
 						 //delay(2000);
 						 
 						 
@@ -1185,6 +1185,20 @@ void menuUsed(MenuUseEvent used){
 		wipe_LCD_screen();
 	}
 	
+	if(used.item.getName() == "Audio Enable")
+	{
+		Serial.println("Enabling .mp3 Audio");
+		soundOnFrontMotion_enabled =		false;
+		soundOnBottomMotion_enabled =		true;
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		
+	}
+	
+	
+	
+	
+	
 	if(used.item.getName() == "Audio Track 2")
 	{
 		digitalWrite(MUTE_AUDIO_PIN,HIGH);
@@ -1212,6 +1226,24 @@ void menuUsed(MenuUseEvent used){
 		wipe_LCD_screen();
 	}
 	
+	if(used.item.getName() == "LEDs Red")
+	{
+		pattern_type = RED_LED_PATTERN_TYPE;
+		Serial.println("Changed LED's to red only");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+	}
+	
+	if(used.item.getName() == "LEDs Green")
+	{
+		pattern_type = GREEN_LED_PATTERN_TYPE;
+		Serial.println("Changed LED's to green only");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+	}
+	
 	if(used.item.getName() == "LEDs Blue")
 	{
 		pattern_type = BLUE_LED_PATTERN_TYPE;
@@ -1230,13 +1262,70 @@ void menuUsed(MenuUseEvent used){
 		wipe_LCD_screen();
 	}
 	
+	if(used.item.getName() == "Piezo Enable")
+	{
+		piezo_enabled = true;
+		Serial.println("Enabled Piezo buzzer");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+	}
+	
+	if(used.item.getName() == "Piezo Disable")
+	{
+		piezo_enabled = false;
+		Serial.println("Disabled Piezo buzzer");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+	}
+	
+	
+	if(used.item.getName() == "Piezo Short")
+	{
+		piezo_time_length = 2000;
+		Serial.println("Set Piezo time length to 2 seconds");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
+		delay(piezo_time_length);
+		digitalWrite(PIEZO_SOUNDER_PIN,LOW);
+	}
+	
+	if(used.item.getName() == "Piezo Long")
+	{
+		piezo_time_length = 4000;
+		Serial.println("Set Piezo time length to 4 seconds");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
+		delay(piezo_time_length);
+		digitalWrite(PIEZO_SOUNDER_PIN,LOW);
+	}
+	
+	if(used.item.getName() == "Piezo Random")
+	{
+		piezo_time_length = random(100,6000);
+		Serial.println("Set Piezo time length to random amount of seconds");
+		delay(1000);
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		digitalWrite(PIEZO_SOUNDER_PIN,HIGH);
+		delay(piezo_time_length);
+		digitalWrite(PIEZO_SOUNDER_PIN,LOW);
+	}
+	
+	
+	
 }
 
-void  readButtons(){  //read buttons status
+void  readButtons(){                      //read buttons status
 	int reading;
 	int buttonEnterState=LOW;             // the current reading from the Enter input pin
-	int buttonEscState=LOW;             // the current reading from the input pin
-	int buttonLeftState=LOW;             // the current reading from the input pin
+	int buttonEscState=LOW;               // the current reading from the input pin
+	int buttonLeftState=LOW;              // the current reading from the input pin
 	int buttonRightState=LOW;             // the current reading from the input pin
 
 	//Enter button
