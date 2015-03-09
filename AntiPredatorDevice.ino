@@ -1249,8 +1249,12 @@ void menuUsed(MenuUseEvent used){
 		SD.end();
 		SD.begin(CARDCS);    // initialise the SD card
 		Serial.println("Playing Audio Track 2");
-		musicPlayer.startPlayingFile("track002.mp3");
-		delay(3000);
+		while(!musicPlayer.playFullFile("track002.mp3")) {
+			// do nothing
+			Serial.println("Inside the while loop");
+		}
+		
+		//delay(3000);
 		digitalWrite(MUTE_AUDIO_PIN,LOW);
 		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
 		wipe_LCD_screen();
@@ -1262,9 +1266,13 @@ void menuUsed(MenuUseEvent used){
 		SD.end();
 		SD.begin(CARDCS);    // initialise the SD card
 		Serial.println("Playing Audio Track Random");
-		musicPlayer.startPlayingFile("track003.mp3");
+		while(!musicPlayer.playFullFile("track003.mp3")) {
+			// do nothing
+			Serial.println("Inside the while loop");
+		}
 		
-		delay(3000);
+		
+		//delay(3000);
 		digitalWrite(MUTE_AUDIO_PIN,LOW);
 		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
 		wipe_LCD_screen();
