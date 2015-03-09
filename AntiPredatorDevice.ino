@@ -136,14 +136,17 @@ MenuBackend menu = MenuBackend(menuUsed,menuChanged);  //Menu variables
 
 
 MenuItem menu1Item1 =         MenuItem("Select Alarm Modes");           //initialize menuitems
-MenuItem menuItem1SubItem1 =  MenuItem("Audio Enable");					// soundOnBottomMotion_enabled and soundOnFrontMotion_enabled set true
-MenuItem menuItem1SubItem2 =  MenuItem("Audio Disable");                // soundOnBottomMotion_enabled and soundOnFrontMotion_enabled set false
-MenuItem menuItem1SubItem3 =  MenuItem("Piezo Enable");                 // piezo_enabled set true
-MenuItem menuItem1SubItem4 =  MenuItem("Piezo Disable");                // piezo_enabled set false
-MenuItem menuItem1SubItem5 =  MenuItem("Small LED Enable");			    // flag for REMOVAL
-MenuItem menuItem1SubItem6 =  MenuItem("Small LED Disable");            // flag for REMOVAL
-MenuItem menuItem1SubItem7 =  MenuItem("Big LED Enable");               // flag for REMOVAL
-MenuItem menuItem1SubItem8 =  MenuItem("Big LED Disable");              // flag for REMOVAL
+MenuItem menuItem1SubItem1 =  MenuItem("Motion A Audio On");			//  soundOnFrontMotion_enabled set true
+MenuItem menuItem1SubItem2 =  MenuItem("Motion A Audio Off");           //  soundOnFrontMotion_enabled set false
+MenuItem menuItem1SubItem3 =  MenuItem("Motion B Audio On");		    // soundOnBottomMotion_enabled set true
+MenuItem menuItem1SubItem4 =  MenuItem("Motion B Audio Off");           // soundOnBottomMotion_enabled set false
+
+
+MenuItem menuItem1SubItem5 =  MenuItem("Piezo Enable");                 // piezo_enabled set true
+MenuItem menuItem1SubItem6 =  MenuItem("Piezo Disable");                // piezo_enabled set false
+MenuItem menuItem1SubItem7 =  MenuItem("Small LED Enable");			    // flag for REMOVAL
+MenuItem menuItem1SubItem8 =  MenuItem("Small LED Disable");            // flag for REMOVAL
+
 MenuItem menu1Item2 =         MenuItem("Select Alarm Pattern");
 MenuItem menuItem2SubItem1 =  MenuItem("LEDs Red");                     // pattern_type set to RED (only play red based routines)
 MenuItem menuItem2SubItem2 =  MenuItem("LEDs Green");                   // pattern_type set to GREEN (only play green based routines)
@@ -183,7 +186,8 @@ boolean soundOnMotion_enabled;
 boolean soundOnFrontMotion_enabled;
 boolean soundOnBottomMotion_enabled;
 
-int pattern_type;         // RED =    1
+int pattern_type;         
+// RED =    1
 // Green =  2
 // Blue =   3
 // Random = 4
@@ -1097,22 +1101,24 @@ void menuChanged(MenuChangeEvent changed){
 		lcd.print("   .:Menu System:.  ");
 		}else if(newMenuItem.getName()=="Select Alarm Modes"){
 		lcd.print("Select Alarm Modes  ");
-		}else if(newMenuItem.getName()=="Audio Enable"){
-		lcd.print("Audio Enable        ");
-		}else if(newMenuItem.getName()=="Audio Disable"){
-		lcd.print("Audio Disable       ");
+		}else if(newMenuItem.getName()=="Motion A Audio On"){
+		lcd.print("Motion A Audio On   ");
+		}else if(newMenuItem.getName()=="Motion A Audio Off"){
+		lcd.print("Motion A Audio Off  ");
+		}else if(newMenuItem.getName()=="Motion B Audio On"){
+		lcd.print("Motion B Audio On    ");
+		}else if(newMenuItem.getName()=="Motion B Audio Off"){
+		lcd.print("Motion B Audio Off   ");
 		}else if(newMenuItem.getName()=="Piezo Enable"){
-		lcd.print("Piezo Enable        ");
+		lcd.print("Piezo Enable         ");
 		}else if(newMenuItem.getName()=="Piezo Disable"){
-		lcd.print("Piezo Disable       ");
+		lcd.print("Piezo Disable        ");
 		}else if(newMenuItem.getName()=="Small LED Enable"){
 		lcd.print("Small LED Enable    ");
 		}else if(newMenuItem.getName()=="Small LED Disable"){
 		lcd.print("Small LED Disable   ");
-		}else if(newMenuItem.getName()=="Big LED Enable"){
-		lcd.print("Big LED Enable      ");
-		}else if(newMenuItem.getName()=="Big LED Disable"){
-		lcd.print("Big LED Disable     ");
+		
+		
 		}else if(newMenuItem.getName()=="Select Alarm Pattern"){
 		lcd.print("Select Alarm Pattern");
 		}else if(newMenuItem.getName()=="LEDs Red"){
@@ -1195,8 +1201,46 @@ void menuUsed(MenuUseEvent used){
 		
 	}
 	
+	if(used.item.getName() == "Motion A Audio On")
+	{
+		Serial.println("Motion A Audio On");
+		soundOnFrontMotion_enabled =		true;
+		//soundOnBottomMotion_enabled =		true;
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		
+	}
+	
+	if(used.item.getName() == "Motion A Audio Off")
+	{
+		Serial.println("Motion A Audio Off");
+		soundOnFrontMotion_enabled =		false;
+		//soundOnBottomMotion_enabled =		true;
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		
+	}
+	
+	if(used.item.getName() == "Motion B Audio On")
+	{
+		Serial.println("Motion B Audio On");
+		//soundOnFrontMotion_enabled =		true;
+		soundOnBottomMotion_enabled =		true;
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		
+	}
 	
 	
+	if(used.item.getName() == "Motion B Audio Off")
+	{
+		Serial.println("Motion B Audio Off");
+		//soundOnFrontMotion_enabled =		true;
+		soundOnBottomMotion_enabled =		true;
+		state =STATE_PREPARE_FOR_DAYTIME_IDLE;
+		wipe_LCD_screen();
+		
+	}
 	
 	
 	if(used.item.getName() == "Audio Track 2")
